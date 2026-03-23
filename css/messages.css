@@ -1,0 +1,209 @@
+/* Messages page styles - Tinder-like design */
+
+body {
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--dark-bg-secondary);
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease;
+    border: 1px solid var(--border-light);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 35px 20px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+.matches-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.matches-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.matches-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.matches-list::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+}
+
+.matches-list::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+.match-item {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.match-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 4px solid #FF5864;
+    padding-left: 16px;
+    transform: translateX(4px);
+}
+
+.match-info {
+    flex: 1;
+}
+
+.match-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+}
+
+.match-details {
+    color: var(--text-light);
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.last-message {
+    color: var(--text-secondary);
+    font-size: 13px;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.match-action {
+    display: flex;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.btn-chat {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+    letter-spacing: 0.5px;
+}
+
+.btn-chat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-chat:active {
+    transform: translateY(0);
+}
+
+.btn-unmatch {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #f5365c 0%, #ec0c38 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 10px rgba(245, 54, 92, 0.2);
+    letter-spacing: 0.5px;
+}
+
+.btn-unmatch:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 54, 92, 0.3);
+}
+
+.btn-unmatch:active {
+    transform: translateY(0);
+}
+
+.unread-badge {
+    background: linear-gradient(135deg, #FF5864 0%, #ff3a4f 100%);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    box-shadow: 0 4px 12px rgba(255, 88, 100, 0.3);
+    letter-spacing: -0.5px;
+}
+
+.empty-message {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-light);
+}
+
+.empty-message h3 {
+    color: #FF5864;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.empty-message p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
