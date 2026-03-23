@@ -1,97 +1,97 @@
-# MatchMe - Tinder-like Dating Aplikacija
+# MatchMe - Tinder-like Dating Application
 
-## 📋 Opis projekta
+## 📋 Project Description
 
-MatchMe je PHP aplikacija koja simulira funkcionalnost Tinder-a. Korisnici se mogu registrovati, prijavljati, pregledati profile drugih korisnika, i lajkovati/diskard-ovati profile.
+MatchMe is a PHP application that simulates Tinder functionality. Users can register, log in, browse other users’ profiles, and like/discard profiles.
 
 ## ✨ Implemented Features
 
-Projekat pokriva sve zahtevane aspekte:
+The project covers all required aspects:
 
-### 1. **Forme i njihova obrada (7 poena)**
-- Registracijska forma sa validacijom
-- Login forma
-- Forma za uređivanje profila
-- AJAX obrada like/dislike akcija
-- Server-side validacija svih input podataka
+### 1. **Forms and their processing (7 points)**
+- Registration form with validation
+- Login form
+- Profile edit form
+- AJAX handling of like/dislike actions
+- Server-side validation of all input data
 
-### 2. **Zaštita od XSS napada (7 poena)**
-- `sanitize_input()` funkcija čisti sve user input-e
-- `htmlspecialchars()` sa ENT_QUOTES za bezbednu pretragu
-- Korišćenje prepared statements u svim SQL upitima
-- `safe_output()` funkcija za siguran prikaz podataka
-- Zaštita CSRF tokena je moguća sa `session_id()`
+### 2. **Protection against XSS attacks (7 points)**
+- `sanitize_input()` function cleans all user input
+- `htmlspecialchars()` with `ENT_QUOTES` for safe searching
+- Use of prepared statements in all SQL queries
+- `safe_output()` function for safe output/display of data
+- CSRF token protection is possible using `session_id()`
 
-### 3. **Rad sa cookie-jima i sesijom (8 poena)**
-- Session management sa `$_SESSION` globalnom promenljivom
-- Cookie-ji sa rokom važenja (30 dana) za user_id i username
-- Automatski logout sa brisanjem session-a i cookie-ja
-- Session validacija na svim zaštićenim stranama
-- Session timeout moguć sa `session_set_cookie_params()`
+### 3. **Working with cookies and sessions (8 points)**
+- Session management using the `$_SESSION` global variable
+- Cookies with an expiration time (30 days) for `user_id` and `username`
+- Automatic logout by deleting the session and cookies
+- Session validation on all protected pages
+- Session timeout possible with `session_set_cookie_params()`
 
-### 4. **Rad sa MySQL bazom podataka (8 poena)**
-- Tri tabele: users, likes, profiles_viewed
-- Operacije: INSERT, SELECT, UPDATE
-- Foreign keys za relacije između tabela
-- Prepared statements za sve SQL upite
-- Transakcije i error handling
+### 4. **Working with a MySQL database (8 points)**
+- Three tables: `users`, `likes`, `profiles_viewed`
+- Operations: `INSERT`, `SELECT`, `UPDATE`
+- Foreign keys for relations between tables
+- Prepared statements for all SQL queries
+- Transactions and error handling
 
-## 🗂️ Struktura fajlova
+## 🗂️ File Structure
 
 ```
 .
-├── index.php           # Početna stranica
-├── register.php        # Registracija korisnika
-├── login.php          # Prijava korisnika
-├── dashboard.php      # Pregled profila
-├── profile.php        # Moj profil
-├── logout.php         # Odjava
-├── db_config.php      # Konfiguracija baze
-├── functions.php      # Helper funkcije
-└── setup.sql          # SQL za kreiranje baze
+├── index.php           # Home page
+├── register.php        # User registration
+├── login.php           # User login
+├── dashboard.php       # Profile browsing
+├─�� profile.php         # My profile
+├── logout.php          # Logout
+├── db_config.php       # Database configuration
+├── functions.php       # Helper functions
+└── setup.sql           # SQL for creating the database
 ```
 
-## 🚀 Instalacija i pokretanje
+## 🚀 Installation and Running
 
-### 1. Preuzmite fajlove
-- Stavite sve fajlove u `htdocs` folder (ako koristiš XAMPP) ili `/var/www/html` (ako koristiš Linux)
+### 1. Download the files
+- Put all files into the `htdocs` folder (if you use XAMPP) or `/var/www/html` (if you use Linux)
 
-### 2. Kreiraj bazu podataka
-- Otvori phpMyAdmin (http://localhost/phpmyadmin)
-- Kreiraj novu bazu `tinder_db`
-- Kopira sadržaj iz `setup.sql` i izvrši u SQL tabu
+### 2. Create the database
+- Open phpMyAdmin (http://localhost/phpmyadmin)
+- Create a new database called `tinder_db`
+- Copy the contents of `setup.sql` and run it in the SQL tab
 
-Ili direktno u terminalu:
+Or directly in the terminal:
 ```bash
 mysql -u root -p < setup.sql
 ```
 
-### 3. Konfiguruj konekciju
-- Otvori `db_config.php`
-- Promeni `$db_user`, `$db_password` i `$db_name` ako je potrebno
+### 3. Configure the connection
+- Open `db_config.php`
+- Change `$db_user`, `$db_password`, and `$db_name` if needed
 
-### 4. Pokreni aplikaciju
-- Otvori browser i idi na `http://localhost/Veb%20programiranje/Projekat/`
+### 4. Run the application
+- Open the browser and go to: `http://localhost/Veb%20programiranje/Projekat/`
 
-## 👤 Test korisnici
+## 👤 Test users
 
-Možeš kreirati test korisnike kroz registraciju, ili uneti direktno u bazu:
+You can create test users through the registration form, or insert them directly into the database:
 
 ```sql
 INSERT INTO users (username, email, password, first_name, age, gender, city, bio, looking_for) 
 VALUES 
-('testuser1', 'test1@example.com', '$2y$10$...', 'John', 25, 'Muški', 'Beograd', 'Volim putovanja', 'Vezu'),
-('testuser2', 'test2@example.com', '$2y$10$...', 'Jane', 23, 'Ženski', 'Novi Sad', 'Ljubitelj knjiga', 'Vezu');
+('testuser1', 'test1@example.com', '$2y$10$...', 'John', 25, 'Male', 'Belgrade', 'I love traveling', 'A relationship'),
+('testuser2', 'test2@example.com', '$2y$10$...', 'Jane', 23, 'Female', 'Novi Sad', 'Book lover', 'A relationship');
 ```
 
-Za lozinku, koristi `password_hash('password123', PASSWORD_DEFAULT)` u PHP-u.
+For the password, use `password_hash('password123', PASSWORD_DEFAULT)` in PHP.
 
-## 🔒 Sigurnost
+## 🔒 Security
 
-- Sve lozinke su heširane sa `password_hash()` i `PASSWORD_DEFAULT`
-- Svi user input-i su čišćeni od XSS napada
-- Prepared statements защite od SQL injekcije
-- Session-i su aktivni tokom pregledanja aplikacije
+- All passwords are hashed with `password_hash()` and `PASSWORD_DEFAULT`
+- All user input is cleaned to prevent XSS attacks
+- Prepared statements protect against SQL injection
+- Sessions are active while browsing the application
 
 ## 🛠️ Technologies
 
@@ -99,32 +99,32 @@ Za lozinku, koristi `password_hash('password123', PASSWORD_DEFAULT)` u PHP-u.
 - MySQL 5.7+
 - HTML5
 - CSS3
-- JavaScript (minimal za aktivacije formi)
+- JavaScript (minimal, for form interactions)
 
-## 📝 Napomene
+## 📝 Notes
 
-- CSS je uključen za bolji UX, ali se ne boduje
-- Rad sa fajlovima nije implementiran (kako je traženo)
-- Sve vrednosti se филтректно sanitizovane pre nego što se prikazuju
+- CSS is included for better UX, but it is not graded
+- File handling is not implemented (as required)
+- All values are properly sanitized before being displayed
 
-## 🎯 Kako funkcioniše aplikacija
+## 🎯 How the application works
 
-1. **Nelogovani korisnik** -> index.php landing stranica
-2. **Registracija** -> register.php (validacija i čuvanje u bazi)
-3. **Login** -> login.php (password_verify, postavljanje session-a i cookie-ja)
-4. **Dashboard** -> dashboard.php (pregled profila, like/dislike)
-5. **Profil** -> profile.php (uređivanje svojih informacija)
-6. **Logout** -> logout.php (brisanje session-a i cookie-ja)
+1. **Not logged in user** -> `index.php` landing page
+2. **Registration** -> `register.php` (validation and saving to the database)
+3. **Login** -> `login.php` (`password_verify`, setting sessions and cookies)
+4. **Dashboard** -> `dashboard.php` (browse profiles, like/dislike)
+5. **Profile** -> `profile.php` (edit your information)
+6. **Logout** -> `logout.php` (deleting the session and cookies)
 
-## 📞 Podrška
+## 📞 Support
 
-Ako imaš pitanja ili problema, proveri:
-- Da li je MySQL server pokrenut
-- Da li su kredencijali tačni u `db_config.php`
-- Lokaciju fajlova (trebali bi biti dostupni preko http://localhost)
+If you have questions or problems, check:
+- Whether the MySQL server is running
+- Whether the credentials in `db_config.php` are correct
+- The file location (they should be accessible via http://localhost)
 
 ---
 
-**Autori:**
-- Projekat kreiran za predmet Veb programiranje
-- Datum: Februar 2026
+**Authors:**
+- Project created for the “Web Programming” course
+- Date: February 2026
