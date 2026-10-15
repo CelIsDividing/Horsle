@@ -142,9 +142,17 @@ function get_gender_text($gender) {
     <div class="container">
         <?php if ($current_profile): ?>
             <div class="profile-card">
-                <div class="profile-header">
-                    <h3><?php echo safe_output($current_profile['first_name']); ?>, <?php echo intval($current_profile['age']); ?></h3>
-                    <div class="profile-info"><?php echo safe_output($current_profile['city'] ?? 'Nepoznat grad'); ?></div>
+                <?php
+                    $photo = !empty($current_profile['photo_url'])
+                        ? $current_profile['photo_url']
+                        : 'https://loremflickr.com/500/500/horse?lock=' . intval($current_profile['id']);
+                ?>
+                <div class="profile-photo">
+                    <img src="<?php echo safe_output($photo); ?>" alt="<?php echo safe_output($current_profile['first_name']); ?>">
+                    <div class="profile-photo-overlay">
+                        <h3><?php echo safe_output($current_profile['first_name']); ?>, <?php echo intval($current_profile['age']); ?></h3>
+                        <div class="profile-info">📍 <?php echo safe_output($current_profile['city'] ?? 'Nepoznat grad'); ?></div>
+                    </div>
                 </div>
                 
                 <div class="profile-body">

@@ -8,7 +8,7 @@ require_login();
 $user_id = $_SESSION['user_id'];
 
 // Pronađi sve matches za trenutnog korisnika
-$query = "SELECT m.id as match_id, u.id, u.username, u.first_name, u.age, u.gender, m.created_at,
+$query = "SELECT m.id as match_id, u.id, u.username, u.first_name, u.age, u.gender, u.photo_url, m.created_at,
           (SELECT message FROM messages WHERE match_id = m.id ORDER BY sent_at DESC LIMIT 1) as last_message,
           (SELECT sent_at FROM messages WHERE match_id = m.id ORDER BY sent_at DESC LIMIT 1) as last_message_time,
           (SELECT COUNT(*) FROM messages WHERE match_id = m.id AND receiver_id = ? AND is_read = FALSE) as unread_count
@@ -49,6 +49,12 @@ $current_user = $current_user_stmt->fetch();
             <?php if (count($matches) > 0): ?>
                 <?php foreach ($matches as $match): ?>
                     <div class="match-item">
+                        <?php
+                            $avatar = !empty($match['photo_url'])
+                                ? $match['photo_url']
+                                : 'https://loremflickr.com/200/200/horse?lock=' . intval($match['id']);
+                        ?>
+                        <img class="match-avatar" src="<?php echo safe_output($avatar); ?>" alt="<?php echo safe_output($match['first_name']); ?>">
                         <div class="match-info">
                             <div class="match-name"><?php echo safe_output($match['first_name']); ?> (<?php echo intval($match['age']); ?>)</div>
                             <div class="match-details">@<?php echo safe_output($match['username']); ?> • <?php echo safe_output($match['gender']); ?></div>

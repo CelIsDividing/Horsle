@@ -76,6 +76,19 @@ function get_gender_text($gender) {
     <?php include 'header.php'; ?>
     
     <div class="container">
+        <?php
+            $photo = !empty($user['photo_url'])
+                ? $user['photo_url']
+                : 'https://loremflickr.com/500/500/horse?lock=' . intval($user['id']);
+        ?>
+        <div class="profile-photo">
+            <img src="<?php echo safe_output($photo); ?>" alt="<?php echo safe_output($user['first_name']); ?>">
+            <div class="profile-photo-overlay">
+                <h3><?php echo safe_output($user['first_name']); ?>, <?php echo intval($user['age']); ?></h3>
+                <div class="profile-photo-info">📍 <?php echo safe_output($user['city'] ?? 'Nepoznat grad'); ?></div>
+            </div>
+        </div>
+
         <h1>Moj profil</h1>
         
         <?php if (!empty($error)): ?>

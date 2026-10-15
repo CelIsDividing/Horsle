@@ -93,6 +93,17 @@ body {
     transform: translateX(4px);
 }
 
+.match-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    margin-right: 14px;
+    border: 2px solid #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 .match-info {
     flex: 1;
 }
