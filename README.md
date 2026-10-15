@@ -29,46 +29,51 @@ The project covers all required aspects:
 - Session validation on all protected pages
 - Session timeout possible with `session_set_cookie_params()`
 
-### 4. **Working with a MySQL database (8 points)**
-- Three tables: `users`, `likes`, `profiles_viewed`
-- Operations: `INSERT`, `SELECT`, `UPDATE`
+### 4. **Working with a PostgreSQL database (8 points)**
+- Tables: `users`, `likes`, `profiles_viewed`, `matches`, `messages`, `sessions`
+- Operations: `INSERT`, `SELECT`, `UPDATE`, `DELETE`
 - Foreign keys for relations between tables
-- Prepared statements for all SQL queries
+- Prepared statements (PDO) for all SQL queries
 - Transactions and error handling
 
-## 🗂️ File Structure
+## 🗂️ Project structure
 
 ```
 .
-├── index.php           # Home page
-├── register.php        # User registration
-├── login.php           # User login
-├── dashboard.php       # Profile browsing
-├─�� profile.php         # My profile
-├── logout.php          # Logout
-├── db_config.php       # Database configuration
-├── functions.php       # Helper functions
-└── setup.sql           # SQL for creating the database
+├── index.php          # Landing page
+├── login.php          # Login
+├── register.php       # Registration
+├── dashboard.php      # Browse profiles
+├── profile.php        # My profile
+├── messages.php       # Matches / messages list
+├── chat.php           # Conversation
+├── unmatch.php        # Remove a match
+├── logout.php         # Logout
+├── db_config.php      # Database configuration (PDO)
+├── session_handler.php# DB-backed session handler
+├── functions.php      # Helper functions
+├── setup.sql          # PostgreSQL schema
+├── seed.sql           # Dummy data
+└── Dockerfile         # Render deployment
 ```
 
-## 🚀 Installation and Running
+## 🚀 Installation and running
 
-### 1. Download the files
-- Put all files into the `htdocs` folder (if you use XAMPP) or `/var/www/html` (if you use Linux)
+### 1. Get the files
+- Put all files in your web server root (`htdocs` for XAMPP, or `/var/www/html` on Linux)
 
 ### 2. Create the database
-- Open phpMyAdmin (http://localhost/phpmyadmin)
-- Create a new database called `tinder_db`
-- Copy the contents of `setup.sql` and run it in the SQL tab
+- Create a database named `tinder_db` (e.g. in pgAdmin or via `psql`)
+- Connect to that database and run the contents of `setup.sql`
 
 Or directly in the terminal:
 ```bash
-mysql -u root -p < setup.sql
+psql -U postgres -d tinder_db -f setup.sql
 ```
 
 ### 3. Configure the connection
-- Open `db_config.php`
-- Change `$db_user`, `$db_password`, and `$db_name` if needed
+- The connection is read from environment variables: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSLMODE`
+- Local fallback values are in `db_config.php` (default `localhost:5432`)
 
 ### 4. Run the application
 - Open the browser and go to: `http://localhost/Veb%20programiranje/Projekat/`
@@ -91,12 +96,12 @@ For the password, use `password_hash('password123', PASSWORD_DEFAULT)` in PHP.
 - All passwords are hashed with `password_hash()` and `PASSWORD_DEFAULT`
 - All user input is cleaned to prevent XSS attacks
 - Prepared statements protect against SQL injection
-- Sessions are active while browsing the application
+- Sessions are stored in the database (PDO session handler)
 
 ## 🛠️ Technologies
 
-- PHP 7.4+
-- MySQL 5.7+
+- PHP 8.0+
+- PostgreSQL 13+
 - HTML5
 - CSS3
 - JavaScript (minimal, for form interactions)
@@ -119,8 +124,8 @@ For the password, use `password_hash('password123', PASSWORD_DEFAULT)` in PHP.
 ## 📞 Support
 
 If you have questions or problems, check:
-- Whether the MySQL server is running
-- Whether the credentials in `db_config.php` are correct
+- Whether the PostgreSQL server is running
+- Whether the credentials are correct (environment variables or `db_config.php`)
 - The file location (they should be accessible via http://localhost)
 
 ---

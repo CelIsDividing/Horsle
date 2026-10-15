@@ -15,27 +15,22 @@ if ($match_id <= 0) {
 
 // Proveri da li je korisnik deo ovog match-a
 $verify_stmt = $conn->prepare("SELECT id FROM matches WHERE id = ? AND (user_id_1 = ? OR user_id_2 = ?)");
-$verify_stmt->bind_param("iii", $match_id, $user_id, $user_id);
-$verify_stmt->execute();
-$verify_result = $verify_stmt->get_result();
+$verify_stmt->execute([$match_id, $user_id, $user_id]);
 
-if ($verify_result->num_rows === 0) {
+if (!$verify_stmt->fetch()) {
     header("Location: messages.php");
     exit();
 }
-$verify_stmt->close();
 
 // Obriši match (što će automatski obrisati i sve poruke zbog CASCADE)
 $delete_stmt = $conn->prepare("DELETE FROM matches WHERE id = ?");
-$delete_stmt->bind_param("i", $match_id);
 
-if ($delete_stmt->execute()) {
-    $delete_stmt->close();
+try {
+    $delete_stmt->execute([$match_id]);
     // Vrati korisnika na messages stranicu
     header("Location: messages.php");
     exit();
-} else {
-    $delete_stmt->close();
+} catch (PDOException $e) {
     header("Location: messages.php");
     exit();
 }

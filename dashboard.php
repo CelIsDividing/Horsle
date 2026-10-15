@@ -11,17 +11,26 @@ $message = "";
 
 // Pronađi pol trenutnog korisnika
 $user_stmt = $conn->prepare("SELECT gender FROM users WHERE id = ?");
-$user_stmt->bind_param("i", $user_id);
-$user_stmt->execute();
-$user_result = $user_stmt->get_result();
-$current_user = $user_result->fetch_assoc();
-$user_gender = $current_user['gender'] ?? 0;
-$user_stmt->close();
+$user_stmt->execute([$user_id]);
+$current_user = $user_stmt->fetch();
+$user_gender = (string)($current_user['gender'] ?? '');
 
-// Ako je korisnik ženski (0), prikaži muške (1) i ostalo (2)
-// Ako je korisnik muški (1), prikaži ženske (0) i ostalo (2)
-$allowed_genders = ($user_gender == 0) ? [1, 2] : [0, 2];
-$gender_filter = "AND u.gender IN (" . implode(",", $allowed_genders) . ")";
+// Prikaži suprotan pol i "Ostalo".
+// Vrednosti mogu biti sačuvane kao tekst ('Muški'/'Ženski'/'Ostalo')
+// ili kao brojevi ('0'/'1'/'2'), pa pokrivamo oba oblika.
+$female_values = ['Ženski', 'Žensko', '0'];
+$male_values   = ['Muški', 'Muško', '1'];
+$other_values  = ['Ostalo', 'Drugo', '2'];
+
+if (in_array($user_gender, $female_values, true)) {
+    $allowed_genders = array_merge($male_values, $other_values);
+} elseif (in_array($user_gender, $male_values, true)) {
+    $allowed_genders = array_merge($female_values, $other_values);
+} else {
+    $allowed_genders = array_merge($female_values, $male_values, $other_values);
+}
+
+$placeholders = implode(',', array_fill(0, count($allowed_genders), '?'));
 
 // Pronađi sve korisnike koje trenutni korisnik nije obradio (like/dislike)
 $query = "SELECT u.* FROM users u 
@@ -29,19 +38,13 @@ $query = "SELECT u.* FROM users u
           AND u.id NOT IN (
               SELECT liked_user_id FROM likes WHERE user_id = ?
           )
-          $gender_filter
+          AND u.gender IN ($placeholders)
           LIMIT 1";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("ii", $user_id, $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt->execute(array_merge([$user_id, $user_id], $allowed_genders));
 
-$current_profile = null;
-if ($result->num_rows > 0) {
-    $current_profile = $result->fetch_assoc();
-}
-$stmt->close();
+$current_profile = $stmt->fetch() ?: null;
 
 // Obrada like/dislike akcija
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
@@ -49,74 +52,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     $liked_user_id = intval($_POST['liked_user_id'] ?? 0);
     
     if ($liked_user_id > 0 && ($action === 'like' || $action === 'dislike')) {
-        // Ubaci u tabelu likes
-        $stmt = $conn->prepare("INSERT INTO likes (user_id, liked_user_id, action) VALUES (?, ?, ?)");
-        $stmt->bind_param("iis", $user_id, $liked_user_id, $action);
-        
-        if ($stmt->execute()) {
+        try {
+            // Ubaci u tabelu likes
+            $stmt = $conn->prepare("INSERT INTO likes (user_id, liked_user_id, action) VALUES (?, ?, ?)");
+            $stmt->execute([$user_id, $liked_user_id, $action]);
+
             // Ako je like akcija, proveri da li postoji mutual like
             if ($action === 'like') {
                 // Proveri da li drugi korisnik lajkuje ovog korisnika
                 $mutual_check = $conn->prepare("SELECT id FROM likes WHERE user_id = ? AND liked_user_id = ? AND action = 'like'");
-                $mutual_check->bind_param("ii", $liked_user_id, $user_id);
-                $mutual_check->execute();
-                $mutual_result = $mutual_check->get_result();
-                
-                if ($mutual_result->num_rows > 0) {
+                $mutual_check->execute([$liked_user_id, $user_id]);
+
+                if ($mutual_check->fetch()) {
                     // Mutual like! Kreiraj match
                     // Prvo proverimo da li match već postoji
                     $match_check = $conn->prepare("SELECT id FROM matches WHERE (user_id_1 = ? AND user_id_2 = ?) OR (user_id_1 = ? AND user_id_2 = ?)");
-                    $match_check->bind_param("iiii", $user_id, $liked_user_id, $liked_user_id, $user_id);
-                    $match_check->execute();
-                    $match_check_result = $match_check->get_result();
-                    
-                    if ($match_check_result->num_rows === 0) {
+                    $match_check->execute([$user_id, $liked_user_id, $liked_user_id, $user_id]);
+
+                    if (!$match_check->fetch()) {
                         // Kreiraj novi match
                         $user_1 = min($user_id, $liked_user_id);
                         $user_2 = max($user_id, $liked_user_id);
-                        
+
                         $match_stmt = $conn->prepare("INSERT INTO matches (user_id_1, user_id_2) VALUES (?, ?)");
-                        $match_stmt->bind_param("ii", $user_1, $user_2);
-                        $match_stmt->execute();
-                        $match_stmt->close();
+                        $match_stmt->execute([$user_1, $user_2]);
                     }
-                    $match_check->close();
                 }
-                $mutual_check->close();
             }
-            
+
             // Loguj da je korisnik pogledao profil
             $log_stmt = $conn->prepare("INSERT INTO profiles_viewed (user_id, viewed_user_id) VALUES (?, ?)");
-            $log_stmt->bind_param("ii", $user_id, $liked_user_id);
-            $log_stmt->execute();
-            $log_stmt->close();
-            
+            $log_stmt->execute([$user_id, $liked_user_id]);
+
             // Preusmeri na istu stranicu da se učita sledeći profil
             header("Location: dashboard.php");
             exit();
-        } else {
-            $error = "Greška pri obradi: " . $conn->error;
+        } catch (PDOException $e) {
+            $error = "Greška pri obradi: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 
 // Pronađi trenutnog korisnika za prikaz njegovog profila
 $current_user_stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$current_user_stmt->bind_param("i", $user_id);
-$current_user_stmt->execute();
-$current_user_result = $current_user_stmt->get_result();
-$current_user = $current_user_result->fetch_assoc();
-$current_user_stmt->close();
+$current_user_stmt->execute([$user_id]);
+$current_user = $current_user_stmt->fetch();
 
 // Pronađi sve like-ove trenutnog korisnika
 $likes_query = "SELECT COUNT(*) as count FROM likes WHERE user_id = ? AND action = 'like'";
 $likes_stmt = $conn->prepare($likes_query);
-$likes_stmt->bind_param("i", $user_id);
-$likes_stmt->execute();
-$likes_result = $likes_stmt->get_result();
-$likes_count = $likes_result->fetch_assoc()['count'];
-$likes_stmt->close();
+$likes_stmt->execute([$user_id]);
+$likes_count = $likes_stmt->fetch()['count'];
 
 function get_gender_text($gender) {
     $gender_map = [

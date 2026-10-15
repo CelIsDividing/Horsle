@@ -34,29 +34,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Proveri da li korisnik već postoji
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->bind_param("ss", $username, $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
+        $stmt->execute([$username, $email]);
+
+        if ($stmt->fetch()) {
             $error = "Korisničko ime ili email već postoje!";
         } else {
             // Heširaj lozinku
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            
+
             // Ubaci novog korisnika
             $stmt = $conn->prepare("INSERT INTO users (username, email, password, first_name, age, gender) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssi", $username, $email, $hashed_password, $first_name, $age, $gender);
-            
-            if ($stmt->execute()) {
+
+            try {
+                $stmt->execute([$username, $email, $hashed_password, $first_name, $age, $gender]);
                 $success = "Registracija uspešna! Sada se možete prijavi.";
                 // Očisti formu
                 $_POST = array();
-            } else {
-                $error = "Greška pri registraciji: " . $conn->error;
+            } catch (PDOException $e) {
+                $error = "Greška pri registraciji: " . $e->getMessage();
             }
         }
-        $stmt->close();
     }
 }
 ?>

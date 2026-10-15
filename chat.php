@@ -16,29 +16,21 @@ if ($match_id <= 0 || $other_user_id <= 0) {
 
 // Proveri da li je match validan
 $match_stmt = $conn->prepare("SELECT id FROM matches WHERE id = ? AND (user_id_1 = ? OR user_id_2 = ?)");
-$match_stmt->bind_param("iii", $match_id, $user_id, $user_id);
-$match_stmt->execute();
-$match_result = $match_stmt->get_result();
+$match_stmt->execute([$match_id, $user_id, $user_id]);
 
-if ($match_result->num_rows === 0) {
+if (!$match_stmt->fetch()) {
     header("Location: messages.php");
     exit();
 }
-$match_stmt->close();
 
 // Pronađi drugog korisnika
 $other_user_stmt = $conn->prepare("SELECT id, username, first_name, age, gender FROM users WHERE id = ?");
-$other_user_stmt->bind_param("i", $other_user_id);
-$other_user_stmt->execute();
-$other_user_result = $other_user_stmt->get_result();
-$other_user = $other_user_result->fetch_assoc();
-$other_user_stmt->close();
+$other_user_stmt->execute([$other_user_id]);
+$other_user = $other_user_stmt->fetch();
 
 // Označi sve poruke kao pročitane
 $read_stmt = $conn->prepare("UPDATE messages SET is_read = TRUE WHERE match_id = ? AND receiver_id = ?");
-$read_stmt->bind_param("ii", $match_id, $user_id);
-$read_stmt->execute();
-$read_stmt->close();
+$read_stmt->execute([$match_id, $user_id]);
 
 // Obrada slanja poruke
 $error = "";
@@ -49,16 +41,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['message'])) {
         $error = "Poruka ne može biti prazna!";
     } else {
         $send_stmt = $conn->prepare("INSERT INTO messages (match_id, sender_id, receiver_id, message) VALUES (?, ?, ?, ?)");
-        $send_stmt->bind_param("iiis", $match_id, $user_id, $other_user_id, $message);
-        
-        if ($send_stmt->execute()) {
+
+        try {
+            $send_stmt->execute([$match_id, $user_id, $other_user_id, $message]);
             // Refresh stranice da vidiš novu poruku
             header("Refresh: 0");
             exit();
-        } else {
+        } catch (PDOException $e) {
             $error = "Greška pri slanju poruke";
         }
-        $send_stmt->close();
     }
 }
 
@@ -68,19 +59,13 @@ $messages_stmt = $conn->prepare("SELECT m.id, m.sender_id, m.message, m.sent_at,
                                  JOIN users u ON m.sender_id = u.id
                                  WHERE m.match_id = ?
                                  ORDER BY m.sent_at ASC");
-$messages_stmt->bind_param("i", $match_id);
-$messages_stmt->execute();
-$messages_result = $messages_stmt->get_result();
-$messages = $messages_result->fetch_all(MYSQLI_ASSOC);
-$messages_stmt->close();
+$messages_stmt->execute([$match_id]);
+$messages = $messages_stmt->fetchAll();
 
 // Pronađi trenutnog korisnika
 $current_user_stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$current_user_stmt->bind_param("i", $user_id);
-$current_user_stmt->execute();
-$current_user_result = $current_user_stmt->get_result();
-$current_user = $current_user_result->fetch_assoc();
-$current_user_stmt->close();
+$current_user_stmt->execute([$user_id]);
+$current_user = $current_user_stmt->fetch();
 ?>
 
 <!DOCTYPE html>

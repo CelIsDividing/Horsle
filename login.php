@@ -20,13 +20,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Pronađi korisnika prema korisniku
         $stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 1) {
-            $row = $result->fetch_assoc();
-            
+        $stmt->execute([$username]);
+        $row = $stmt->fetch();
+
+        if ($row) {
             // Proveri lozinku
             if (password_verify($password, $row['password'])) {
                 // Prijava uspešna - postavi session
@@ -45,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $error = "Korisničko ime ne postoji!";
         }
-        $stmt->close();
     }
 }
 ?>

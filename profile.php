@@ -11,11 +11,8 @@ $success = "";
 
 // Pronađi informacije o korisniku
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$stmt->close();
+$stmt->execute([$user_id]);
+$user = $stmt->fetch();
 
 // Obrada forme za ažuriranje profila
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -28,36 +25,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Ime je obavezno!";
     } else {
         $stmt = $conn->prepare("UPDATE users SET first_name = ?, bio = ?, city = ?, looking_for = ? WHERE id = ?");
-        $stmt->bind_param("ssssi", $first_name, $bio, $city, $looking_for, $user_id);
-        
-        if ($stmt->execute()) {
+
+        try {
+            $stmt->execute([$first_name, $bio, $city, $looking_for, $user_id]);
             $success = "Profil je uspešno ažuriran!";
             // Osveži podatke
             $user['first_name'] = $first_name;
             $user['bio'] = $bio;
             $user['city'] = $city;
             $user['looking_for'] = $looking_for;
-        } else {
-            $error = "Greška pri ažuriranju: " . $conn->error;
+        } catch (PDOException $e) {
+            $error = "Greška pri ažuriranju: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 
 // Pronađi statistiku
 $likes_stmt = $conn->prepare("SELECT COUNT(*) as count FROM likes WHERE user_id = ? AND action = 'like'");
-$likes_stmt->bind_param("i", $user_id);
-$likes_stmt->execute();
-$likes_result = $likes_stmt->get_result();
-$likes_count = $likes_result->fetch_assoc()['count'];
-$likes_stmt->close();
+$likes_stmt->execute([$user_id]);
+$likes_count = $likes_stmt->fetch()['count'];
 
 $views_stmt = $conn->prepare("SELECT COUNT(*) as count FROM profiles_viewed WHERE user_id = ?");
-$views_stmt->bind_param("i", $user_id);
-$views_stmt->execute();
-$views_result = $views_stmt->get_result();
-$views_count = $views_result->fetch_assoc()['count'];
-$views_stmt->close();
+$views_stmt->execute([$user_id]);
+$views_count = $views_stmt->fetch()['count'];
 
 // Funkcija za konverziju pola
 function get_gender_text($gender) {

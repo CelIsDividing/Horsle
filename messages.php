@@ -16,22 +16,16 @@ $query = "SELECT m.id as match_id, u.id, u.username, u.first_name, u.age, u.gend
           JOIN users u ON (m.user_id_1 = u.id OR m.user_id_2 = u.id)
           WHERE (m.user_id_1 = ? OR m.user_id_2 = ?)
           AND u.id != ?
-          ORDER BY last_message_time DESC";
+          ORDER BY last_message_time DESC NULLS LAST";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("iiii", $user_id, $user_id, $user_id, $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$matches = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$stmt->execute([$user_id, $user_id, $user_id, $user_id]);
+$matches = $stmt->fetchAll();
 
 // Pronađi trenutnog korisnika
 $current_user_stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$current_user_stmt->bind_param("i", $user_id);
-$current_user_stmt->execute();
-$current_user_result = $current_user_stmt->get_result();
-$current_user = $current_user_result->fetch_assoc();
-$current_user_stmt->close();
+$current_user_stmt->execute([$user_id]);
+$current_user = $current_user_stmt->fetch();
 ?>
 
 <!DOCTYPE html>
